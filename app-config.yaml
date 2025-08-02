@@ -88,6 +88,12 @@ catalog:
       rules:
         - allow: [Template]
 
+    # GitHub Teams template
+    - type: file
+      target: ../../examples/github-teams-template/template.yaml
+      rules:
+        - allow: [Template]
+
     # Local example organizational data
     - type: file
       target: ../../examples/org.yaml

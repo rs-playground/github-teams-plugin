@@ -1,0 +1,98 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: github-teams-template
+  title: GitHub Teams Creator
+  description: Create a GitHub team in an organization with specified members and permissions
+spec:
+  owner: user:guest
+  type: service
+
+  parameters:
+    - title: Team Information
+      required:
+        - organization
+        - teamName
+      properties:
+        organization:
+          title: Organization
+          type: string
+          description: GitHub organization name
+          ui:autofocus: true
+        teamName:
+          title: Team Name
+          type: string
+          description: Name of the team to create
+        description:
+          title: Description
+          type: string
+          description: Team description (optional)
+        privacy:
+          title: Privacy
+          type: string
+          description: Team privacy level
+          enum:
+            - closed
+            - secret
+          default: closed
+          enumNames:
+            - Closed (visible to organization members)
+            - Secret (visible only to team members)
+
+    - title: Team Members
+      properties:
+        members:
+          title: Members
+          type: array
+          description: Team members to add
+          items:
+            type: object
+            required:
+              - username
+            properties:
+              username:
+                title: GitHub Username
+                type: string
+                description: GitHub username of the member
+              role:
+                title: Role
+                type: string
+                description: Role of the member in the team
+                enum:
+                  - member
+                  - maintainer
+                default: member
+                enumNames:
+                  - Member (standard team member)
+                  - Maintainer (team admin)
+
+  steps:
+    - id: create-team
+      name: Create GitHub Team
+      action: github:team:create
+      input:
+        organization: ${{ parameters.organization }}
+        teamName: ${{ parameters.teamName }}
+        description: ${{ parameters.description }}
+        privacy: ${{ parameters.privacy }}
+        members: ${{ parameters.members }}
+
+  output:
+    links:
+      - title: Team URL
+        url: ${{ steps['create-team'].output.teamUrl }}
+      - title: Organization Teams
+        url: https://github.com/orgs/${{ parameters.organization }}/teams
+    text:
+      - title: Team Created Successfully
+        content: |
+          GitHub team **${{ parameters.teamName }}** has been created successfully!
+          
+          **Team Details:**
+          - Organization: ${{ parameters.organization }}
+          - Team ID: ${{ steps['create-team'].output.teamId }}
+          - Team Slug: ${{ steps['create-team'].output.teamSlug }}
+          - Privacy: ${{ parameters.privacy }}
+          - Members: ${{ parameters.members | length }} member(s)
+          
+          You can manage the team at: ${{ steps['create-team'].output.teamUrl }}
