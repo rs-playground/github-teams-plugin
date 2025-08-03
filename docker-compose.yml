@@ -1,0 +1,22 @@
+version: '3.8'
+services:
+  backstage:
+    build: .
+    ports:
+      - "3000:3000"
+      - "7007:7007"
+    environment:
+      - GITHUB_APP_ID_FILE=/run/secrets/github_app_id
+      - GITHUB_APP_CLIENT_SECRET_FILE=/run/secrets/github_client_secret
+    secrets:
+      - github_app_id
+      - github_client_secret
+      - github_private_key
+
+secrets:
+  github_app_id:
+    file: ./secrets/github_app_id.txt
+  github_client_secret:
+    file: ./secrets/github_client_secret.txt
+  github_private_key:
+    file: ./secrets/github_private_key.pem

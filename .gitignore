@@ -58,3 +58,4 @@ e2e-test-report/
 
 # Cache
 .cache/
+.env.github

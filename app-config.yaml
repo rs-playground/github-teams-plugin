@@ -38,6 +38,7 @@ integrations:
       # This is a Personal Access Token or PAT from GitHub. You can find out how to generate this token, and more information
       # about setting up the GitHub integration here: https://backstage.io/docs/integrations/github/locations#configuration
       token: ${GITHUB_TOKEN}
+      # GitHub App configuration will be loaded from app-config.local.yaml
     ### Example for how to add your GitHub Enterprise instance using the API:
     # - host: ghe.example.net
     #   apiBaseUrl: https://ghe.example.net/api/v3
@@ -67,6 +68,7 @@ auth:
   providers:
     # See https://backstage.io/docs/auth/guest/provider
     guest: {}
+
 
 scaffolder:
   # see https://backstage.io/docs/features/software-templates/configuration for software template options

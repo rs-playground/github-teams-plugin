@@ -53,7 +53,8 @@ backend.add(import('@backstage/plugin-search-backend-module-techdocs'));
 backend.add(import('@backstage/plugin-kubernetes-backend'));
 
 // custom plugins
-backend.add(import('example-plugin'));
-backend.add(import('github-teams'));
+// backend.add(import('example-plugin'));
+// backend.add(import('github-teams'));
 
+backend.add(import('@internal/plugin-scaffolder-backend-module-github-team'));
 backend.start();
