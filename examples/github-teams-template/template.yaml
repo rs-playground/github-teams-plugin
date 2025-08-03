@@ -93,6 +93,24 @@ spec:
           - Team ID: ${{ steps['create-team'].output.teamId }}
           - Team Slug: ${{ steps['create-team'].output.teamSlug }}
           - Privacy: ${{ parameters.privacy }}
-          - Members: ${{ parameters.members | length }} member(s)
+          
+          **Member Management Results:**
+          {% if steps['create-team'].output.membersAdded | length > 0 %}
+          ✅ **Successfully Added Members (${{ steps['create-team'].output.membersAdded | length }}):**
+          {% for member in steps['create-team'].output.membersAdded %}
+          - ${{ member.username }} (role: ${{ member.role }})
+          {% endfor %}
+          {% endif %}
+          
+          {% if steps['create-team'].output.membersFailed | length > 0 %}
+          ❌ **Failed to Add Members (${{ steps['create-team'].output.membersFailed | length }}):**
+          {% for member in steps['create-team'].output.membersFailed %}
+          - ${{ member.username }} (role: ${{ member.role }}) - Error: ${{ member.error }}
+          {% endfor %}
+          {% endif %}
+          
+          {% if steps['create-team'].output.membersAdded | length == 0 and steps['create-team'].output.membersFailed | length == 0 %}
+          No members were specified for this team.
+          {% endif %}
           
           You can manage the team at: ${{ steps['create-team'].output.teamUrl }}

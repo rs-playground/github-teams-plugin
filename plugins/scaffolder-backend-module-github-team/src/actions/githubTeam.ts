@@ -113,7 +113,16 @@ export function createGithubTeamCreateAction(options: {
         }),
         teamSlug: (z) => z.string({
           description: 'Team slug'
-        })
+        }),
+        membersAdded: (z) => z.array(z.object({
+          username: z.string(),
+          role: z.string()
+        })).describe('Successfully added team members'),
+        membersFailed: (z) => z.array(z.object({
+          username: z.string(),
+          role: z.string(),
+          error: z.string()
+        })).describe('Failed team member additions with error details')
       }
     },
     async handler(ctx) {
@@ -171,6 +180,10 @@ export function createGithubTeamCreateAction(options: {
         ctx.logger.info(`Team created successfully: ${team.name} (ID: ${team.id})`);
 
         // Add members to the team if provided
+        const memberResults: {
+          added: Array<{ username: string; role: string }>;
+          failed: Array<{ username: string; role: string; error: string }>;
+        } = { added: [], failed: [] };
         if (input.members && input.members.length > 0) {
           ctx.logger.info(`Adding ${input.members.length} members to the team`);
           
@@ -182,11 +195,28 @@ export function createGithubTeamCreateAction(options: {
                 username: member.username,
                 role: member.role || 'member',
               });
-              ctx.logger.info(`Added ${member.username} as ${member.role || 'member'}`);
+              memberResults.added.push({
+                username: member.username,
+                role: member.role || 'member'
+              });
+              ctx.logger.info(`✅ Added ${member.username} as ${member.role || 'member'}`);
             } catch (error) {
-              ctx.logger.warn(`Failed to add member ${member.username}: ${error}`);
+              memberResults.failed.push({
+                username: member.username,
+                role: member.role || 'member',
+                error: error instanceof Error ? error.message : 'Unknown error'
+              });
+              ctx.logger.warn(`❌ Failed to add member ${member.username}: ${error}`);
               // Continue with other members rather than failing completely
             }
+          }
+          
+          // Log summary of member operations
+          if (memberResults.added.length > 0) {
+            ctx.logger.info(`Successfully added ${memberResults.added.length} members: ${memberResults.added.map(m => m.username).join(', ')}`);
+          }
+          if (memberResults.failed.length > 0) {
+            ctx.logger.warn(`Failed to add ${memberResults.failed.length} members: ${memberResults.failed.map(m => m.username).join(', ')}`);
           }
         }
 
@@ -194,6 +224,8 @@ export function createGithubTeamCreateAction(options: {
         output('teamId', team.id);
         output('teamUrl', team.html_url);
         output('teamSlug', team.slug);
+        output('membersAdded', memberResults.added);
+        output('membersFailed', memberResults.failed);
 
         ctx.logger.info(`GitHub team creation completed successfully`);
 
